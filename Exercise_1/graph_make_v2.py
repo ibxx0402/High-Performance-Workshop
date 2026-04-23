@@ -5,11 +5,12 @@ import numba
 
 @numba.jit()
 def make_graph(size,max_edges):
-    #TODO Make this fast. it has a very high big O notation.
+    """
+    Makes a graph with at max x max_egdes and with random connectoins.
 
+    Uses numpa foor hopefull speedup.
 
-    # Fills up the graph with edges.
-   # graph = [[-1]*max_edges]*size #The start.
+    """
 
 
 
