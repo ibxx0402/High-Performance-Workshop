@@ -1,4 +1,3 @@
-import random
 import numpy as np
 import numba
 
@@ -80,4 +79,5 @@ def make_graph(size,max_edges):
 
 if __name__ == "__main__":
 
-    print(make_graph(100_000,3))
+    graph_array = make_graph(100_000,3)
+    np.save('graph_array_random.npy', graph_array)

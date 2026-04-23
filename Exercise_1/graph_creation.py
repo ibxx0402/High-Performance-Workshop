@@ -1,14 +1,28 @@
 import numpy as np
+from numba import jit
 
-max_nodes = 300_000*10
-max_neighbors = 1000
+max_nodes = 100#55_000
+
+max_neighbors = max_nodes-1
+
 graph_array = np.zeros((max_nodes, max_neighbors), dtype=int)
 
-for n in range(max_nodes):
-    neighbor_ids = list(range(max(0, n - max_neighbors), n))
+neighbor_ids = np.arange(max_nodes)
 
-    graph_array[n, :len(neighbor_ids)] = neighbor_ids
+neighbors = np.empty(max_nodes - 1, dtype=neighbor_ids.dtype)
 
-    graph_array[neighbor_ids, len(neighbor_ids)-1] = n
+@jit(nopython=True)
+def node_creation(max_nodes, neighbor_ids, neighbors, graph_array):
+    for n in range(max_nodes):
+        neighbors[:n] = neighbor_ids[:n]      # view copy into buffer
+        neighbors[n:] = neighbor_ids[n+1:]    # view copy into buffer
+        
+        graph_array[n, :max_nodes-1] = neighbors
+        graph_array[neighbors, max_nodes-2] = n
+        #print(n)
+    return graph_array
+#print(graph_array)
 
-#np.save('graph_array_g2.npy', graph_array)
+
+graph_array = node_creation(max_nodes, neighbor_ids, neighbors, graph_array)
+np.save('graph_array_g3.npy', graph_array)
