@@ -79,23 +79,23 @@ def bfsv_parallel(graph, source):
     V = len(graph)
     distance = np.full(V, -1, dtype=np.int32)
     distance[source] = 0
-    level = 1
+    frontier = 1
 
-    FoundS = np.zeros(V, dtype=np.bool_)
-    FoundS[source] = True
+    frontier_array = np.zeros(V, dtype=np.bool_)
+    frontier_array[source] = True 
 
-    while np.any(FoundS):
-        NotS = np.zeros(V, dtype=np.bool_)
+    while np.any(frontier_array):
+        neighbor_array = np.zeros(V, dtype=np.bool_) # The Visited nodes in this itteration
 
         for u in prange(V): #Can be length V instead as every FoundS is V length         
-            if FoundS[u]: #Find actual node
+            if frontier_array[u]: #Find actual node
                 for v in graph[u]:
                     if distance[v] == -1:
-                        NotS[v] = True      
-                        distance[v] = level
+                        neighbor_array[v] = True      
+                        distance[v] = frontier
 
-        FoundS = NotS
-        level += 1
+        frontier_array = neighbor_array # The now visited notes
+        frontier += 1
 
     return distance
 
@@ -105,23 +105,23 @@ def bfsv_jit_2(G, s): #s = source vertex, G = graph
     V = len(G)
     distance = np.full(V, -1, dtype=np.int32)
     distance[s] = 0
-    level = 1
+    frontier = 1
 
-    FoundS = np.zeros(V, dtype=np.bool_)
-    FoundS[s] = True
+    frontier_array = np.zeros(V, dtype=np.bool_)
+    frontier_array[s] = True
 
-    while np.any(FoundS):
-        NotS = np.zeros(V, dtype=np.bool_)
+    while np.any(frontier_array):
+        neighbor_array = np.zeros(V, dtype=np.bool_)
 
         for u in range(V): #Can be length V instead as every FoundS is V length         
-            if FoundS[u]: #Find actual node
+            if frontier_array[u]: #Find actual node
                 for v in G[u]:
                     if distance[v] == -1:
-                        NotS[v] = True      
-                        distance[v] = level
+                        neighbor_array[v] = True      
+                        distance[v] = frontier
 
-        FoundS = NotS
-        level += 1
+        frontier_array = neighbor_array
+        frontier += 1
 
     return distance
 
