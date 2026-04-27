@@ -26,7 +26,7 @@ import numpy as np
 import timeit
 from numba import jit, prange
 
-Example_graph = np.load('graph_array_random.npy')
+Example_graph = np.load('graph_array_g3.npy')
 
 def bfsv_python(G, s): #s = source vertex, G = graph
     Q = deque()
@@ -53,8 +53,9 @@ def bfsv_python(G, s): #s = source vertex, G = graph
 #Just removed unnecessary for loop and while loop condition. 
 def bfsv_jit(G, s): #s = source vertex, G = graph
     Q = []
-    distance = np.zeros(len(G), dtype=np.int32)-1
-    visited = [False]*len(G) #Set all vertices to unvisited
+    V = len(G)
+    distance = np.full(V, -1, dtype=np.int32)
+    visited = np.zeros(V, dtype=np.bool_) #Set all vertices to unvisited
 
 
     distance[s] = 0 #Distance from source to source is 0
@@ -98,9 +99,40 @@ def bfsv_parallel(graph, source):
 
     return distance
 
+@jit(nopython=True)
+#Just removed unnecessary for loop and while loop condition. 
+def bfsv_jit_2(G, s): #s = source vertex, G = graph
+    V = len(G)
+    distance = np.full(V, -1, dtype=np.int32)
+    distance[s] = 0
+    level = 1
 
-print(timeit.timeit(lambda: bfsv_jit(Example_graph, 0), number=3))
-print(timeit.timeit(lambda: bfsv_parallel(Example_graph, 0), number=3))
+    FoundS = np.zeros(V, dtype=np.bool_)
+    FoundS[s] = True
+
+    while np.any(FoundS):
+        NotS = np.zeros(V, dtype=np.bool_)
+
+        for u in range(V): #Can be length V instead as every FoundS is V length         
+            if FoundS[u]: #Find actual node
+                for v in G[u]:
+                    if distance[v] == -1:
+                        NotS[v] = True      
+                        distance[v] = level
+
+        FoundS = NotS
+        level += 1
+
+    return distance
+
+
+
+
+
+print(timeit.timeit(lambda: bfsv_jit(Example_graph, 1), number=3))
+print(timeit.timeit(lambda: bfsv_jit_2(Example_graph, 1), number=3))
+print(timeit.timeit(lambda: bfsv_parallel(Example_graph, 1), number=3))
+print(timeit.timeit(lambda: bfsv_python(Example_graph, 1), number=3))
 
 """ jit_bfs = bfsv_jit(Example_graph, 0)
 par_bfs = bfsv_parallel(Example_graph, 0)
