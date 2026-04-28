@@ -24,55 +24,40 @@ Exercise 1b
 from collections import deque 
 import numpy as np 
 import timeit
-from numba import jit, prange
+from numba import jit, prange, config
+import os
 
-Example_graph = np.load('graph_array_g3.npy')
+
+
+cpuCount = os.cpu_count()
+
+#config.NUMBA_NUM_THREADS = 4
+#cpuCount = 4
+
+print("Number of CPUs in the system:", cpuCount)
 
 def bfsv_python(G, s): #s = source vertex, G = graph
-    Q = deque()
-    distance = [np.inf]*len(G) #Sets all distances to infin
-    visited = [False]*len(G) #Set all vertices to unvisited
-    distance[s] = 0 #Distance from source to source is 0
-    visited[s] = True #Mark source vertex as visited
-    Q.append(s)
-    
-    while Q: 
-        u = Q.popleft() #u = current vertex
-        #distance.append(u)
-        
-        for w in G[u]:
-            if not visited[w]:
-                visited[w] = True
-                distance[w] = distance[u] + 1
-                Q.append(w)
-    return distance
-
-
-
-@jit(nopython=True)
-#Just removed unnecessary for loop and while loop condition. 
-def bfsv_jit(G, s): #s = source vertex, G = graph
-    Q = []
     V = len(G)
     distance = np.full(V, -1, dtype=np.int32)
-    visited = np.zeros(V, dtype=np.bool_) #Set all vertices to unvisited
+    distance[s] = 0
+    frontier = 1
 
+    frontier_array = np.zeros(V, dtype=np.bool_)
+    frontier_array[s] = True
 
-    distance[s] = 0 #Distance from source to source is 0
-    visited[s] = True #Mark source vertex as visited
-    Q.append(s)
-    
-    while Q: 
-        u = Q.pop(0) #u = current vertex
-        #distance.append(u)
-        
-        for w in G[u]:
-            if not visited[w]:
-                visited[w] = True
-                distance[w] = distance[u] + 1 #Should be able to move out of for loop, and append to distance according to geeksforgeeks
-                Q.append(w)
+    while np.any(frontier_array):
+        neighbor_array = np.zeros(V, dtype=np.bool_)
+
+        for u in range(V): #Can be length V instead as every FoundS is V length         
+            if frontier_array[u]: #Find actual node
+                for v in G[u]:
+                    if distance[v] == -1:
+                        neighbor_array[v] = True      
+                        distance[v] = frontier
+
+        frontier_array = neighbor_array
+        frontier += 1
     return distance
-
 
 @jit(nopython=True, parallel=True)
 def bfsv_parallel(graph, source):
@@ -101,7 +86,7 @@ def bfsv_parallel(graph, source):
 
 @jit(nopython=True)
 #Just removed unnecessary for loop and while loop condition. 
-def bfsv_jit_2(G, s): #s = source vertex, G = graph
+def bfsv_jit(G, s): #s = source vertex, G = graph
     V = len(G)
     distance = np.full(V, -1, dtype=np.int32)
     distance[s] = 0
@@ -128,23 +113,69 @@ def bfsv_jit_2(G, s): #s = source vertex, G = graph
 
 
 
+Example_graph = np.load('graph_array_random_g2.npy')
 
-print(timeit.timeit(lambda: bfsv_jit(Example_graph, 1), number=3))
-print(timeit.timeit(lambda: bfsv_jit_2(Example_graph, 1), number=3))
-print(timeit.timeit(lambda: bfsv_parallel(Example_graph, 1), number=3))
-print(timeit.timeit(lambda: bfsv_python(Example_graph, 1), number=3))
+test_array = [bfsv_jit, bfsv_python, bfsv_parallel]
+test_names = ["bfsv_jit", "bfsv_python", "bfsv_parallel"]
 
-""" jit_bfs = bfsv_jit(Example_graph, 0)
-par_bfs = bfsv_parallel(Example_graph, 0)
+for index, test in enumerate(test_array):
+    test_array[index] = timeit.timeit(lambda: test(Example_graph, 0), number=3)
+    print(f"{test_names[index]} {test_array[index]}")
 
+#Pick fastest sequential version
+if float(test_array[0]) <= float(test_array[1]):
+    t1 = test_array[0]
+else:
+    t1 = test_array[1]
 
+speedup = t1/float(test_array[2])
+print(f"speedup = {speedup}")
+print(f"effeciency = {speedup/cpuCount}")
 
+#Tests with m1 pro, with 4 performance and 4 effeciency cores 
 
-if False in ((par_bfs) == (jit_bfs)):
+"""
+For graph with 8 nodes and 3 neighbors from graph_make_v2.py
+bfsv_jit  0.28428620801423676
+bfsv_parallel  0.3848474159894977
+bfsv_python  0.00010383399785496294
+"""
 
-    print("Shit virker ikke ")
-    a = (par_bfs) == (jit_bfs)
-    wrong =np.where(a == False)[0]
-    print(jit_bfs[wrong])
-    print(par_bfs[wrong])
- """
+"""
+For graph with 25_000 nodes and 24_999 neighbors from graph_creation.py
+bfsv_jit 5.434447417006595
+bfsv_python 201.06373858402367
+bfsv_parallel 0.9579067500017118
+speedup = 5.673253077083843
+effeciency = 0.7091566346354804
+"""
+
+"""
+For graph with 100_000 nodes and 3 neighbors from graph_creation.py
+Number of CPUs in the system: 8
+bfsv_jit 0.32240383300813846
+bfsv_python 0.4663189999992028
+bfsv_parallel 0.3625497089815326
+speedup = 0.8892679404262352
+effeciency = 0.1111584925532794
+"""
+
+"""
+For graph with 1_000_000 nodes and 3 neighbors from graph_creation.py
+Number of CPUs in the system: 8
+bfsv_jit 0.5197193329804577
+bfsv_python 5.412401041015983
+bfsv_parallel 0.4219777919934131
+speedup = 1.2316272155587047
+effeciency = 0.1539534019448381
+"""
+
+"""
+For example graph
+Number of CPUs in the system: 8
+bfsv_jit 0.38280683298944496
+bfsv_python 0.00011183301103301346
+bfsv_parallel 0.38762529200175777
+speedup = 0.00028850803428096824
+effeciency = 3.606350428512103e-05
+"""
