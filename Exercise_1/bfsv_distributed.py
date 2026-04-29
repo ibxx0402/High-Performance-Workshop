@@ -1,31 +1,49 @@
 import numpy as np 
 from mpi4py import MPI
 
-def bfsv_distributed(graph, source):
+
+
+def bfsv_distributed(source):
   
     #INIT MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
-    proc_count = comm.Get_size()
+    size = comm.Get_size()
 
 
+    if rank == 0:
+        graph = np.load('graph_array_example.npy')
+        V = len(graph)
+        chunk = V // size
+        chunks = [graph[i * chunk:(i + 1) * chunk] for i in range(size)]
+    else:
+        V = None
+        chunks = None
+
+    V = comm.bcast(V, root=0) 
+    frontier_stack = comm.scatter(chunks, root=0)
 
     #Init bfs 
-    V = len(graph)
-    print(V)
     distance = np.full(V, -1, dtype=np.int32)
-    
     distance[source] = 0
     frontier = 0
-    frontier_stack = []
+ 
     neighbor_stack = []
-
-    split_graph_size = V / proc_count
-
-    #begin BFS traversal
+    print(f"Rank {rank} frontier_stack {frontier_stack} test")
+    
     while True:
-        frontier_stack = {the set of local vertices with frontier}
-        
+        break
+        #all vertices traversed
+        """ if frontier_stack == [] for all processors then:
+            return distance """
+
+
+    """ #begin BFS traversal
+    while True:
+        local_start = rank * chunk
+        local_end   = local_start + chunk
+        frontier_stack = graph[local_start: local_end]
+
         #all vertices traversed
         if frontier_stack == [] for all processors then:
             return distance
@@ -43,7 +61,6 @@ def bfsv_distributed(graph, source):
         #combine the received message to form local next vertex frontier then update the level for them
         NS_rcv = Union(N_j_rcv)
         for v in NS_rcv and d[v] == -1 do
-            d[v] = level + 1
+            d[v] = level + 1  """
     
-Example_graph = np.load('graph_array_example.npy')
-print(bfsv_distributed(Example_graph, 0))
+bfsv_distributed(0)
