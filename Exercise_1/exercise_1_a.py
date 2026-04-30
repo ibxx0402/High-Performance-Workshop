@@ -111,28 +111,29 @@ def bfsv_jit(G, s): #s = source vertex, G = graph
     return distance
 
 
+if __name__ == "__main__":
 
-
-Example_graph = np.load('graph_array_random_g2.npy')
-
-test_array = [bfsv_jit, bfsv_python, bfsv_parallel]
-test_names = ["bfsv_jit", "bfsv_python", "bfsv_parallel"]
-
-for index, test in enumerate(test_array):
-    test_array[index] = timeit.timeit(lambda: test(Example_graph, 0), number=3)
-    print(f"{test_names[index]} {test_array[index]}")
-
-#Pick fastest sequential version
-if float(test_array[0]) <= float(test_array[1]):
-    t1 = test_array[0]
-else:
-    t1 = test_array[1]
-
-speedup = t1/float(test_array[2])
-print(f"speedup = {speedup}")
-print(f"effeciency = {speedup/cpuCount}")
-
-#Tests with m1 pro, with 4 performance and 4 effeciency cores 
+    
+    Example_graph = np.load('graph_array_random_g2.npy')
+    
+    test_array = [bfsv_jit, bfsv_python, bfsv_parallel]
+    test_names = ["bfsv_jit", "bfsv_python", "bfsv_parallel"]
+    
+    for index, test in enumerate(test_array):
+        test_array[index] = timeit.timeit(lambda: test(Example_graph, 0), number=3)
+        print(f"{test_names[index]} {test_array[index]}")
+    
+    #Pick fastest sequential version
+    if float(test_array[0]) <= float(test_array[1]):
+        t1 = test_array[0]
+    else:
+        t1 = test_array[1]
+    
+    speedup = t1/float(test_array[2])
+    print(f"speedup = {speedup}")
+    print(f"effeciency = {speedup/cpuCount}")
+    
+    #Tests with m1 pro, with 4 performance and 4 effeciency cores 
 
 """
 For graph with 8 nodes and 3 neighbors from graph_make_v2.py
