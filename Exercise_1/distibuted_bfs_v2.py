@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import numpy as np
+import timeit
 
 # mpiexec -n 3 python Exercise_1\distibuted_bfs.py
 
@@ -165,25 +166,38 @@ def index_offset(i,split,rank):
 
 
 if __name__ == "__main__":
-
-
     graph = np.array([[1,2,4],[3,4,-1],[4,5,-1],[6,-1,-1],[6,7,8],[7,-1,-1],[8,-1,-1],[8,-1,-1],[-1,-1,-1]],dtype=np.int32)
 
     nasty_graph = np.array([[1,2,4],[3,4,-1],[4,5,-1],[6,-1,-1],[6,7,8],[7,-1,-1],[8,-1,-1],[8,-1,-1],[-1,-1,9],[10,-1,-1],[11,-1,-1],[-1,-1,-1]],dtype=np.int32)
     source = 0
 
-    super_graph = np.load("graph_array_random.npy")
+    super_graph = np.load("graph_array_random_g2.npy")
+    
 
 
+    
 
-    t = bfsv_dist_mem_parallel(super_graph,source)
+    print(timeit.timeit(lambda: bfsv_dist_mem_parallel(super_graph, 0), number=3))
 
+    exit()
     from exercise_1_a import bfsv_python
 
     x = bfsv_python(super_graph,source)
-
+    t = bfsv_dist_mem_parallel(super_graph,source)
     print(f"t and x is the same = {np.array_equal(t,x)}")
 
 
 
-    
+    """
+    2779.961048750003
+    2780.04953525
+    2779.983738875002
+    2779.9707286659977
+
+
+
+
+    8.732920917012962
+
+
+    """

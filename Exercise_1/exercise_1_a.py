@@ -140,6 +140,7 @@ For graph with 8 nodes and 3 neighbors from graph_make_v2.py
 bfsv_jit  0.28428620801423676
 bfsv_parallel  0.3848474159894977
 bfsv_python  0.00010383399785496294
+bfsv_dist_mem_parallel = 0.14827950001927093 p = 3
 """
 
 """
@@ -157,8 +158,13 @@ Number of CPUs in the system: 8
 bfsv_jit 0.32240383300813846
 bfsv_python 0.4663189999992028
 bfsv_parallel 0.3625497089815326
-speedup = 0.8892679404262352
-effeciency = 0.1111584925532794
+- speedup = 0.8892679404262352
+- effeciency = 0.1111584925532794
+bfsv_dist_mem_parallel = 8.732920917012962
+- speedup = 0.05951265767
+- effeciency = 0.007439082209
+
+
 """
 
 """
@@ -167,8 +173,11 @@ Number of CPUs in the system: 8
 bfsv_jit 0.5197193329804577
 bfsv_python 5.412401041015983
 bfsv_parallel 0.4219777919934131
-speedup = 1.2316272155587047
-effeciency = 0.1539534019448381
+- speedup = 1.2316272155587047
+- effeciency = 0.1539534019448381
+bfsv_dist_mem_parallel = 2780.04953525 - 4p 
+- speedup = 0.0001869460693
+- effeciency = 0.00002899263385
 """
 
 """
@@ -179,4 +188,8 @@ bfsv_python 0.00011183301103301346
 bfsv_parallel 0.38762529200175777
 speedup = 0.00028850803428096824
 effeciency = 3.606350428512103e-05
+
+
+
+
 """

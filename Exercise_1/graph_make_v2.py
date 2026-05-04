@@ -80,4 +80,4 @@ def make_graph(size,max_edges):
 if __name__ == "__main__":
 
     graph_array = make_graph(100_000,3)
-    np.save('graph_array_random.npy', graph_array)
+    np.save('graph_array_random_g1.npy', graph_array)
