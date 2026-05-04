@@ -135,13 +135,6 @@ if __name__ == "__main__":
     
     #Tests with m1 pro, with 4 performance and 4 effeciency cores 
 
-"""
-For graph with 8 nodes and 3 neighbors from graph_make_v2.py
-bfsv_jit  0.28428620801423676
-bfsv_parallel  0.3848474159894977
-bfsv_python  0.00010383399785496294
-bfsv_dist_mem_parallel = 0.14827950001927093 p = 3
-"""
 
 """
 For graph with 25_000 nodes and 24_999 neighbors from graph_creation.py
@@ -163,8 +156,6 @@ bfsv_parallel 0.3625497089815326
 bfsv_dist_mem_parallel = 8.732920917012962
 - speedup = 0.05951265767
 - effeciency = 0.007439082209
-
-
 """
 
 """
@@ -175,9 +166,9 @@ bfsv_python 5.412401041015983
 bfsv_parallel 0.4219777919934131
 - speedup = 1.2316272155587047
 - effeciency = 0.1539534019448381
-bfsv_dist_mem_parallel = 2780.04953525 - 4p 
-- speedup = 0.0001869460693
-- effeciency = 0.00002899263385
+bfsv_dist_mem_parallel = 1033.3555122080143
+- speedup = 0.0005029433983
+- effeciency = 0.00006286792479
 """
 
 """
@@ -186,10 +177,9 @@ Number of CPUs in the system: 8
 bfsv_jit 0.38280683298944496
 bfsv_python 0.00011183301103301346
 bfsv_parallel 0.38762529200175777
-speedup = 0.00028850803428096824
-effeciency = 3.606350428512103e-05
-
-
-
-
+- speedup = 0.00028850803428096824
+- effeciency = 3.606350428512103e-05
+bfsv_dist_mem_parallel = 0.14827950001927093 p = 3 unable to run higher num
+- speedup = 0.0007542041281
+- effeciency = 0.00009427551602
 """
