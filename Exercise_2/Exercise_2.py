@@ -21,7 +21,7 @@ def grayscale_jit(image, rows, grayscale_array):
     for row in range(rows):
         grayscale_array[row] = np.sum(image[row]*luminance_array, axis=1)-128
         #print("\n", grayscale_array) """
-    return grayscale_array
+    return grayscale_array+128
 
 
 @jit(nopython=True)
@@ -101,7 +101,7 @@ def grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, k_width, k_heigh
                 y[k] =  idct_const_h * y_sum
             block[:,col] = y
         grayscale_array[row_par:row_par+k_height, col_par:col_par+k_width] = block
-    return grayscale_array
+    return grayscale_array+128
 
 
 image = cv2.imread("Exercise_2/image.png")
@@ -120,6 +120,7 @@ quantization_matrix = np.array([[16, 11, 10, 16, 24, 40, 51, 61],
                                 [49, 64, 78, 87, 103, 121, 120, 101], 
                                 [72, 92, 95, 98, 112, 100, 103, 99]])
 
+"""
 number = 20
 print("grayscale_jpeg_conv_jit ", timeit.timeit(lambda: grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, k_width, k_height, quantization_matrix), number=number)/number)
 exit() 
@@ -136,7 +137,7 @@ transformed_image = grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, 
 cv2.imwrite("compressed_image.png", transformed_image)
 image_jit = grayscale_jit(image, rows, grayscale_array)
 cv2.imwrite("grayscale_jit.png", image_jit)
-#image = np.clip(transformed_image, 0, 255).astype(np.uint8)
-#cv2.imshow("image", image)
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
+
+cv2.imshow("image", transformed_image.astype(np.uint8))
+cv2.waitKey(0)
+cv2.destroyAllWindows()

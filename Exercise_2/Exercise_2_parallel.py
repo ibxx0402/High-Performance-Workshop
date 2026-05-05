@@ -77,7 +77,7 @@ def grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, k_width, k_heigh
                     y_sum += block[:,col][n] * dct_cos_cols[k, n]
                 y[k] = 2 * y_sum
             block[:,col] = y
-            
+
         #quantization
         block = np.round(block/quantization_matrix) * quantization_matrix
 
@@ -103,6 +103,7 @@ def grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, k_width, k_heigh
                     y_sum += block[n, col] * idct_cos_cols[k,n]
                 y[k] = idct_const_h  * y_sum
             block[:,col] = y
+        
         grayscale_array[row_par:row_par+k_height, col_par:col_par+k_width] = block
     return grayscale_array+128
 
@@ -140,7 +141,7 @@ transformed_image = grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, 
 cv2.imwrite("compressed_image2.png", transformed_image)
 image_jit = grayscale_jit(image, rows, grayscale_array)
 cv2.imwrite("grayscale_jit2.png", image_jit)
-#image = np.clip(transformed_image, 0, 255).astype(np.uint8)
-#cv2.imshow("image", image)
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
+
+cv2.imshow("image", transformed_image.astype(np.uint8))
+cv2.waitKey(0)
+cv2.destroyAllWindows()
