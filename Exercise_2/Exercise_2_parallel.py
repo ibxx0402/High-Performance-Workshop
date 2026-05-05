@@ -1,6 +1,7 @@
 import cv2
 import numpy as np 
-from numba import jit 
+from numba import jit, prange
+from scipy import fftpack
 import timeit
 
 
@@ -24,12 +25,12 @@ def grayscale_jit(image, rows, grayscale_array):
     return grayscale_array+128
 
 
-@jit(nopython=True)
+@jit(nopython=True, parallel=True)
 def grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, k_width, k_height, quantization_matrix): 
     
     #Grayscale conversion
     luminance_array = np.array([0.114, 0.587 , 0.299]) #in bgr format instead of rgb 
-    for row in range(rows):
+    for row in prange(rows):
         grayscale_array[row] = np.sum(image[row]*luminance_array, axis=1)-128
     
     #Precompute cos arrays 
@@ -47,14 +48,16 @@ def grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, k_width, k_heigh
             dct_cos_cols[k, n] = np.cos(((np.pi*k)*(2*n+1))/(2*(k_width)))
             idct_cos_cols[k, n] = np.cos(((np.pi*n)*(2*k+1))/(2*(k_width)))
 
+
     #Partition the image into blocks of k_width x k_height
     col_block_count = cols // k_width
     row_block_count = rows // k_height
-    for block_idx in range(col_block_count *row_block_count ):
+    for block_idx in prange(col_block_count *row_block_count ):
         col_par = (block_idx % col_block_count) * k_width
         row_par = (block_idx // col_block_count) * k_height
   
-        block = grayscale_array[row_par:row_par+k_height, col_par:col_par+k_width]
+        block = grayscale_array[row_par:row_par+k_height, col_par:col_par+k_width].copy()
+
         #First pass on rows 
         for row in range(k_height):
             y = np.empty(k_width)
@@ -86,7 +89,7 @@ def grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, k_width, k_heigh
             for k in range(k_width):
                 y_sum = (block[row][0])/2 
                 for n in range(1, k_width): #Important to start at 1
-                    y_sum += block[row, n] * idct_cos_rows[k, n]
+                    y_sum += block[row, n] * idct_cos_rows[k,n]
                 y[k] = idct_const_w * y_sum
             block[row] = y
         
@@ -97,9 +100,10 @@ def grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, k_width, k_heigh
             for k in range(k_height):
                 y_sum = (block[0,col])/2
                 for n in range(1, k_height):
-                    y_sum += block[n, col] * idct_cos_cols[k, n]
-                y[k] =  idct_const_h * y_sum
+                    y_sum += block[n, col] * idct_cos_cols[k,n]
+                y[k] = idct_const_h  * y_sum
             block[:,col] = y
+        
         grayscale_array[row_par:row_par+k_height, col_par:col_par+k_width] = block
     return grayscale_array+128
 
@@ -134,9 +138,9 @@ transformed_image = grayscale_jpeg_conv_jit(image, grayscale_array, rows, cols, 
 #print("grayscale_np ", timeit.timeit(lambda: grayscale_np(image, grayscale_array), number=10))
 
 
-cv2.imwrite("compressed_image.png", transformed_image)
+cv2.imwrite("compressed_image2.png", transformed_image)
 image_jit = grayscale_jit(image, rows, grayscale_array)
-cv2.imwrite("grayscale_jit.png", image_jit)
+cv2.imwrite("grayscale_jit2.png", image_jit)
 
 cv2.imshow("image", transformed_image.astype(np.uint8))
 cv2.waitKey(0)
