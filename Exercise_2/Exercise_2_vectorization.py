@@ -80,7 +80,7 @@ def jpeg_compress_vectorized(image, k_width, k_height, quantization_matrix):
     return rec
 
 # load the image 
-image = cv2.imread('C:/Users/adc01/OneDrive - Aalborg Universitet/AAU/6semester/High Performance Programming/Workshop/High-Performance-Workshop/Exercise_2/grayscale.jpeg')
+image = cv2.imread('Exercise_2/image.png')
 
 k_width, k_height = 8, 8
 
@@ -95,26 +95,16 @@ quantization_matrix = np.array([[16, 11, 10, 16, 24, 40, 51, 61],
                                 [72, 92, 95, 98, 112, 100, 103, 99]], dtype=np.float32)
 
 # timing
-t1 = timeit.timeit(
-    lambda: jpeg_compress_vectorized(image, k_height, k_width, quantization_matrix),
-    number=10
-)
 
-t2 = timeit.timeit(
-    lambda: jpeg_compress_global(image, quantization_matrix),
-    number=10
-)
-print(f"Average time: {t1/10*1000:.2f} ms\n\nAverage time: {t2/10*1000:.2f} ms")
-
-#image_np = grayscale_np(image)
-#cv2.imwrite("grayscale.jpeg", image_np)
-
+#"""
+number = 20
+print("jpeg_compress_vectorized ", timeit.timeit(lambda: jpeg_compress_vectorized(image, k_height, k_width, quantization_matrix), number=number)/number)
+exit() 
+#"""
 
 result = jpeg_compress_vectorized(image, k_height, k_width, quantization_matrix)
-print(result.dtype)  # Should print: uint8
-print(result.min(), result.max())
-cv2.imwrite("compressed_image.jpeg", result)
+cv2.imwrite("compressed_image3.png", result)
 
 # Global DCT version
-result_global = jpeg_compress_global(image, quantization_matrix)
-cv2.imwrite("compressed_image_global.jpeg", result_global)
+#result_global = jpeg_compress_global(image, quantization_matrix)
+#cv2.imwrite("compressed_image_global.jpeg", result_global)
